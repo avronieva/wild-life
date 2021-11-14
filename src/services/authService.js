@@ -3,11 +3,11 @@ const User = require('../models/User');
 const { jwtSign } = require('../utils/jwtUtils');
 
 exports.register = (userData) => {
-    User.create(userData);
+    return User.create(userData);
 }
 
 exports.login = async ({email, password}) => {
-    let user = await User.findOne({ email });
+    let user = await User.findOne( {email: email }).exec();
 
     if (!user) {
         throw new Error('Invalid username or password');
@@ -22,7 +22,6 @@ exports.login = async ({email, password}) => {
     let payload = {
         _id: user._id,
         email: user.email,
-        password: user.password
     }
 
     let token = await jwtSign(payload, SECRET, { expiresIn: '1h' });
