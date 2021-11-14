@@ -1,4 +1,6 @@
 const mongoose = require('mongoose');
+const bcrypt = require('bcrypt');
+const { SALT_ROUNDS } = require('../constants');
 
 const userSchema = new mongoose.Schema({
     firstName: {
@@ -24,6 +26,19 @@ const userSchema = new mongoose.Schema({
         }
     ]
 });
+
+userSchema.pre('save', function(next) {
+    return bcrypt.hash(this.password, SALT_ROUNDS)
+        .then((hash) => {
+            this.password = hash;
+            next();
+        });
+});
+
+userSchema.method('validatePassword', function (password) {
+    return bcrypt.compare(password, this.password);
+})
+
 
 const User = mongoose.model('User', userSchema);
 
