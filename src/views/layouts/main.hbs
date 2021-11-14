@@ -28,12 +28,12 @@
 
             <ul class="menu">
                 <li><a href="/">Home</a></li>
-                <li><a href="#">All Posts</a></li>
+                <li><a href="/post/all">All Posts</a></li>
             {{#if user}}
                 <!-- Logged users -->
-                <li><a href="#">Create Post</a></li>
+                <li><a href="/post/create">Create Post</a></li>
                 <li><a href="#">Posts of {{user.email}}</a></li>
-                <li><a href="#">Logout</a></li>
+                <li><a href="/auth/logout">Logout</a></li>
             {{else}}
                 <!-- Guest users -->
                 <li><a href="/auth/register">Register</a></li>
