@@ -4,7 +4,7 @@ const {PORT} = require('./constants');
 const hbsConfig = require('./config/hbsConfig');
 const expressConfig = require('./config/expressConfig');
 const routes = require('./routes');
-
+const {initDb} = require('./config/dbConfig');
 
 const app = express();
 
@@ -13,5 +13,8 @@ expressConfig(app);
 
 app.use(routes);
 
-
-app.listen(PORT, console.log('App is running...'));
+initDb()
+    .then(() => {
+        app.listen(PORT, console.log('App is running...'));
+    })
+    .catch(err => console.log('Cannot connect BD: ', err));
