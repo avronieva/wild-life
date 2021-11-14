@@ -1,7 +1,9 @@
 const express = require('express');
 
+const {PORT} = require('./constants');
 const hbsConfig = require('./config/hbsConfig');
 const expressConfig = require('./config/expressConfig');
+const routes = require('./routes');
 
 
 const app = express();
@@ -9,8 +11,7 @@ const app = express();
 hbsConfig(app);
 expressConfig(app);
 
-app.get('/', (req, res) => {
-   res.render('home', { layout: false });
-})
+app.use(routes);
 
-app.listen(5000, console.log('App is running...'));
+
+app.listen(PORT, console.log('App is running...'));
