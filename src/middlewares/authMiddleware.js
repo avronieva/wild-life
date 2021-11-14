@@ -8,6 +8,7 @@ exports.authMiddleware = function (req, res, next) {
         jwtVerify(token, SECRET)
             .then((decodedToken) => {
                 req.user = decodedToken;
+                res.locals.user = decodedToken; // global variable
                 next();
             })
             .catch((error) => {
