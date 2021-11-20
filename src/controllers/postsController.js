@@ -50,4 +50,18 @@ router.get('/details/:postId', async (req, res) => {
     res.render('posts/details', {...postData, authorName, isAuthor, hasVoted, votes})
 });
 
+router.get('/edit/:postId', async (req, res) => {
+   let post = await postsService.getOne(req.params.postId);
+
+   res.render('posts/edit', {...post.toObject()});
+});
+
+router.post('/edit/:postId', async (req, res) => {
+    let { title, keyword, location, creationDate, imageUrl, description } = req.body;
+
+    await postsService.updateOne(req.params.postId, { title, keyword, location, creationDate, imageUrl, description });
+   
+    res.redirect(`/posts/details/${req.params.postId}`);
+})
+
 module.exports = router;
