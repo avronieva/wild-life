@@ -1,6 +1,7 @@
 const router = require('express').Router();
 
 const postsService = require('../services/postsService');
+const authService = require('../services/authService');
 
 async function isAuthor(req, res, next) {
     let post = await postsService.getOne(req.params.postId);
@@ -40,8 +41,9 @@ router.post('/create', async (req, res) => {
 router.get('/details/:postId', async (req, res) => {
     let post = await postsService.getOne(req.params.postId);
     let postData = await post.toObject();
+    let author = await authService.getUser(postData.author);
 
-    let authorName = "???";
+    let authorName = `${author.firstName} ${author.lastName}`;
     let isAuthor = postData.author == req.user?._id;
     let votes = post.getVotes();
 
@@ -62,6 +64,12 @@ router.post('/edit/:postId', async (req, res) => {
     await postsService.updateOne(req.params.postId, { title, keyword, location, creationDate, imageUrl, description });
    
     res.redirect(`/posts/details/${req.params.postId}`);
-})
+});
+
+router.get('/delete/:postId', async (req, res) => {
+    await postsService.deleteOne(req.params.postId);
+
+    res.redirect('/posts');
+});
 
 module.exports = router;

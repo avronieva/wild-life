@@ -28,3 +28,5 @@ exports.login = async ({email, password}) => {
 
     return token;
 }
+
+exports.getUser = (id) => User.findById(id).lean();
