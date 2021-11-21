@@ -51,7 +51,7 @@ router.get('/details/:postId', async (req, res) => {
         let voter = await authService.getUser(post.votes[i]);
         votes.push(voter.email);
     }
-    votes.join(', ');
+    votes = votes.join(', ');
 
     let hasVoted = post.votes.some(x => x._id == req.user?._id);
     
