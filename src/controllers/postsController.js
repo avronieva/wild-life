@@ -72,4 +72,13 @@ router.get('/delete/:postId', async (req, res) => {
     res.redirect('/posts');
 });
 
+router.get('/:userId', async (req, res) => {
+    let allUserPosts = await postsService.getAllUserPosts(req.params.userId);
+    let author = await authService.getUser(req.params.userId);
+
+    let authorName = `${author.firstName} ${author.lastName}`;
+    
+    res.render('posts/my-posts', {allUserPosts, authorName});
+});
+
 module.exports = router;
