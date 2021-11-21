@@ -16,8 +16,12 @@ router.get('/create', isAuth, (req, res) => {
 });
 
 router.post('/create', isAuth, async (req, res) => {
-    await postsService.create({ ...req.body, author: req.user._id, rating: 0 });
-    res.redirect('/posts');
+    try {
+        await postsService.create({ ...req.body, author: req.user._id, rating: 0 });
+        res.redirect('/posts');
+    } catch (error) {
+        res.status(400).render('posts/create', { error: error.message });
+    }
 });
 
 router.get('/details/:postId', async (req, res) => {
