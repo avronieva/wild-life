@@ -2,38 +2,20 @@ const router = require('express').Router();
 
 const postsService = require('../services/postsService');
 const authService = require('../services/authService');
-
-async function isAuthor(req, res, next) {
-    let post = await postsService.getOne(req.params.postId);
-
-    if (post.author == req.user._id) {
-        res.redirect('/404'); 
-    } else {
-        next();
-    }
-}
-
-async function isNotAuthor(req, res, next) {
-    let post = await postsService.getOne(req.params.postId);
-
-    if (post.author != req.user._id) {
-        res.redirect('/404'); 
-    } else {
-        next();
-    }
-}
+const { isAuth } = require('../middlewares/authMiddleware');
+const { isAuthor, isNotAuthor } = require('../middlewares/postAuthMiddleware');
 
 
 router.get('/', async (req, res) => {
     let posts = await postsService.getAll();
-    res.render('posts/all', {posts});
+    res.render('posts/all', { posts });
 });
 
-router.get('/create', (req, res) => {
+router.get('/create', isAuth, (req, res) => {
     res.render('posts/create');
 });
 
-router.post('/create', async (req, res) => {
+router.post('/create', isAuth, async (req, res) => {
     await postsService.create({ ...req.body, author: req.user._id, rating: 0 });
     res.redirect('/posts');
 });
@@ -45,7 +27,7 @@ router.get('/details/:postId', async (req, res) => {
 
     let authorName = `${author.firstName} ${author.lastName}`;
     let isAuthor = postData.author == req.user?._id;
-    
+
     let votes = [];
     for (let i = 0; i < post.votes.length; i++) {
         let voter = await authService.getUser(post.votes[i]);
@@ -54,49 +36,49 @@ router.get('/details/:postId', async (req, res) => {
     votes = votes.join(', ');
 
     let hasVoted = post.votes.some(x => x._id == req.user?._id);
-    
-    res.render('posts/details', {...postData, authorName, isAuthor, hasVoted, votes})
+
+    res.render('posts/details', { ...postData, authorName, isAuthor, hasVoted, votes })
 });
 
-router.get('/edit/:postId', async (req, res) => {
-   let post = await postsService.getOne(req.params.postId);
+router.get('/edit/:postId', isAuth, isAuthor, async (req, res) => {
+    let post = await postsService.getOne(req.params.postId);
 
-   res.render('posts/edit', {...post.toObject()});
+    res.render('posts/edit', { ...post.toObject() });
 });
 
-router.post('/edit/:postId', async (req, res) => {
+router.post('/edit/:postId', isAuth, isAuthor, async (req, res) => {
     let { title, keyword, location, creationDate, imageUrl, description } = req.body;
 
     await postsService.updateOne(req.params.postId, { title, keyword, location, creationDate, imageUrl, description });
-   
+
     res.redirect(`/posts/details/${req.params.postId}`);
 });
 
-router.get('/delete/:postId', async (req, res) => {
+router.get('/delete/:postId', isAuth, isAuthor, async (req, res) => {
     await postsService.deleteOne(req.params.postId);
 
     res.redirect('/posts');
 });
 
-router.get('/:userId', async (req, res) => {
+router.get('/:userId', isAuth, async (req, res) => {
     let allUserPosts = await postsService.getAllUserPosts(req.params.userId);
     let author = await authService.getUser(req.params.userId);
 
     let authorName = `${author.firstName} ${author.lastName}`;
 
-    res.render('posts/my-posts', {allUserPosts, authorName});
+    res.render('posts/my-posts', { allUserPosts, authorName });
 });
 
-router.get('/vote-up/:postId', async (req, res) => {
-   await postsService.increaseVotes(req.params.postId, req.user?._id);
+router.get('/vote-up/:postId', isAuth, isNotAuthor, async (req, res) => {
+    await postsService.increaseVotes(req.params.postId, req.user?._id);
 
-   res.redirect(`/posts/details/${req.params.postId}`);
-});
-
-router.get('/vote-down/:postId', async (req, res) => {
-    await postsService.decreaseVotes(req.params.postId, req.user?._id);
- 
     res.redirect(`/posts/details/${req.params.postId}`);
- })
+});
+
+router.get('/vote-down/:postId', isAuth, isNotAuthor, async (req, res) => {
+    await postsService.decreaseVotes(req.params.postId, req.user?._id);
+
+    res.redirect(`/posts/details/${req.params.postId}`);
+});
 
 module.exports = router;

@@ -7,5 +7,8 @@ const postsController = require('./controllers/postsController');
 router.use(homeController);
 router.use('/auth', authController);
 router.use('/posts', postsController);
+router.use('*', (req, res) => {
+    res.status(404).render('404');
+});
 
 module.exports = router;
