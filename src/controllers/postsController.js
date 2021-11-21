@@ -45,7 +45,13 @@ router.get('/details/:postId', async (req, res) => {
 
     let authorName = `${author.firstName} ${author.lastName}`;
     let isAuthor = postData.author == req.user?._id;
-    let votes = post.getVotes();
+    
+    let votes = [];
+    for (let i = 0; i < post.votes.length; i++) {
+        let voter = await authService.getUser(post.votes[i]);
+        votes.push(voter.email);
+    }
+    votes.join(', ');
 
     let hasVoted = post.votes.some(x => x._id == req.user?._id);
     
@@ -77,8 +83,20 @@ router.get('/:userId', async (req, res) => {
     let author = await authService.getUser(req.params.userId);
 
     let authorName = `${author.firstName} ${author.lastName}`;
-    
+
     res.render('posts/my-posts', {allUserPosts, authorName});
 });
+
+router.get('/vote-up/:postId', async (req, res) => {
+   await postsService.increaseVotes(req.params.postId, req.user?._id);
+
+   res.redirect(`/posts/details/${req.params.postId}`);
+});
+
+router.get('/vote-down/:postId', async (req, res) => {
+    await postsService.decreaseVotes(req.params.postId, req.user?._id);
+ 
+    res.redirect(`/posts/details/${req.params.postId}`);
+ })
 
 module.exports = router;

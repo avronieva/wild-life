@@ -16,3 +16,27 @@ exports.getAllUserPosts = async (userId) => {
 
     return result;
 }
+
+exports.increaseVotes =  async (id, userId) => {
+    let post = await this.getOne(id).lean();
+
+    let rating = post.rating;
+    rating += 1;
+
+    let votes = post.votes;
+    votes.push(userId);
+
+    return Post.findByIdAndUpdate(id, {rating, votes});
+}
+
+exports.decreaseVotes =  async (id, userId) => {
+    let post = await this.getOne(id).lean();
+
+    let rating = post.rating;
+    rating -= 1;
+
+    let votes = post.votes;
+    votes.push(userId);
+
+    return Post.findByIdAndUpdate(id, {rating, votes});
+}
